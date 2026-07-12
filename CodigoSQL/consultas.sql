@@ -1,128 +1,5 @@
 -- ============================================
--- 1. CREAR LAS VISTAS (Views)
--- ============================================
-
--- Vista 1: Administrador - Vista General
-CREATE OR REPLACE VIEW vista_administrador AS
-SELECT 
-    'Mascotas' as tipo,
-    COUNT(*) as total,
-    (SELECT COUNT(*) FROM Mascota WHERE id_estado_adopcion = 1) as disponibles,
-    (SELECT COUNT(*) FROM Mascota WHERE id_estado_adopcion = 2) as en_proceso,
-    (SELECT COUNT(*) FROM Mascota WHERE id_estado_adopcion = 3) as adoptadas
-FROM Mascota
-UNION ALL
-SELECT 'Adoptantes', COUNT(*), 
-    (SELECT COUNT(*) FROM Adoptante WHERE id_estado_habilitacion = 1),
-    (SELECT COUNT(*) FROM Adoptante WHERE id_estado_habilitacion = 2),
-    (SELECT COUNT(*) FROM Adoptante WHERE id_estado_habilitacion = 3)
-FROM Adoptante
-UNION ALL
-SELECT 'Rescatistas', COUNT(*), 
-    (SELECT COUNT(*) FROM Rescatista WHERE id_rol = 1),
-    (SELECT COUNT(*) FROM Rescatista WHERE id_rol = 2),
-    (SELECT COUNT(*) FROM Rescatista WHERE id_rol = 3)
-FROM Rescatista
-UNION ALL
-SELECT 'Adopciones', COUNT(*),
-    (SELECT COUNT(*) FROM Adopta WHERE id_estado_proceso = 1),
-    (SELECT COUNT(*) FROM Adopta WHERE id_estado_proceso = 2),
-    (SELECT COUNT(*) FROM Adopta WHERE id_estado_proceso = 3)
-FROM Adopta;
-
--- Vista 2: Personal de Adopciones
-CREATE OR REPLACE VIEW vista_adopciones AS
-SELECT 
-    a.id_adopcion,
-    m.nombre as mascota,
-    p.nombre as adoptante,
-    p.telefono,
-    p.correo_electronico,
-    a.fecha_solicitud,
-    a.fecha_entrega,
-    ep.descripcion as estado_proceso,
-    ea.descripcion as estado_mascota,
-    s.descripcion as sexo,
-    r.descripcion as raza,
-    DATEDIFF(CURDATE(), a.fecha_solicitud) as dias_en_proceso
-FROM Adopta a
-JOIN Mascota m ON a.id_mascota = m.id_mascota
-JOIN Persona p ON a.id_persona = p.id_persona
-JOIN EstadoProcesoAdopcion ep ON a.id_estado_proceso = ep.id_estado_proceso
-LEFT JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion
-LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
-LEFT JOIN Raza r ON m.id_raza = r.id_raza;
-
--- Vista 3: Personal Veterinario
-CREATE OR REPLACE VIEW vista_veterinario AS
-SELECT 
-    m.id_mascota,
-    m.nombre,
-    s.descripcion as sexo,
-    r.descripcion as raza,
-    m.fecha_nacimiento,
-    TIMESTAMPDIFF(YEAR, m.fecha_nacimiento, CURDATE()) as edad,
-    ea.descripcion as estado_adopcion,
-    v.fecha_revision as ultima_revision,
-    v.diagnostico,
-    v.tratamiento,
-    v.observaciones,
-    (SELECT COUNT(*) FROM Vacuna WHERE id_valoracion = v.id_valoracion) as total_vacunas
-FROM Mascota m
-LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
-LEFT JOIN Raza r ON m.id_raza = r.id_raza
-LEFT JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion
-LEFT JOIN ValoracionMedica v ON m.id_mascota = v.id_mascota
-WHERE v.fecha_revision = (
-    SELECT MAX(fecha_revision) 
-    FROM ValoracionMedica 
-    WHERE id_mascota = m.id_mascota
-) OR v.fecha_revision IS NULL;
-
--- Vista 4: Rescatistas
-CREATE OR REPLACE VIEW vista_rescatista AS
-SELECT 
-    m.id_mascota,
-    m.nombre,
-    s.descripcion as sexo,
-    r.descripcion as raza,
-    TIMESTAMPDIFF(YEAR, m.fecha_nacimiento, CURDATE()) as edad,
-    ea.descripcion as estado_adopcion,
-    re.fecha_rescate,
-    re.ubicacion_rescate,
-    re.historia_rescate,
-    p.nombre as rescatista_asignado,
-    (SELECT COUNT(*) FROM ValoracionMedica WHERE id_mascota = m.id_mascota) as total_revisiones
-FROM Rescate re
-JOIN Mascota m ON re.id_mascota = m.id_mascota
-JOIN Persona p ON re.id_persona = p.id_persona
-LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
-LEFT JOIN Raza r ON m.id_raza = r.id_raza
-LEFT JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion
-WHERE ea.id_estado_adopcion IN (1, 2);
-
--- Vista 5: Adoptantes (Mascotas disponibles)
-CREATE OR REPLACE VIEW vista_adoptante AS
-SELECT 
-    m.id_mascota,
-    m.nombre,
-    s.descripcion as sexo,
-    r.descripcion as raza,
-    TIMESTAMPDIFF(YEAR, m.fecha_nacimiento, CURDATE()) as edad,
-    ea.descripcion as estado,
-    re.ubicacion_rescate,
-    re.historia_rescate,
-    (SELECT COUNT(*) FROM ValoracionMedica WHERE id_mascota = m.id_mascota) as revisiones
-FROM Mascota m
-LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
-LEFT JOIN Raza r ON m.id_raza = r.id_raza
-LEFT JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion
-LEFT JOIN Rescate re ON m.id_mascota = re.id_mascota
-WHERE ea.id_estado_adopcion = 1 -- Solo disponibles
-ORDER BY m.id_mascota DESC;
-
--- ============================================
--- 2. CONSULTAS ESPECIALES (para las 15 consultas)
+-- 2. CONSULTAS ESPECIALES (CORREGIDAS)
 -- ============================================
 
 -- Consulta 1: INNER JOIN - Mascotas con sus adoptantes
@@ -130,7 +7,7 @@ CREATE OR REPLACE VIEW consulta_inner_join AS
 SELECT 
     m.nombre as mascota,
     s.descripcion as sexo,
-    r.descripcion as raza,
+    raza.descripcion as raza,
     p.nombre as adoptante,
     p.telefono,
     a.fecha_solicitud,
@@ -140,7 +17,7 @@ INNER JOIN Mascota m ON a.id_mascota = m.id_mascota
 INNER JOIN Persona p ON a.id_persona = p.id_persona
 INNER JOIN EstadoProcesoAdopcion ep ON a.id_estado_proceso = ep.id_estado_proceso
 LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
-LEFT JOIN Raza r ON m.id_raza = r.id_raza
+LEFT JOIN Raza raza ON m.id_raza = raza.id_raza
 ORDER BY a.fecha_solicitud DESC;
 
 -- Consulta 2: GROUP BY - Estadísticas por estado de adopción
@@ -149,7 +26,7 @@ SELECT
     ea.descripcion as estado,
     COUNT(*) as cantidad,
     AVG(TIMESTAMPDIFF(YEAR, m.fecha_nacimiento, CURDATE())) as edad_promedio,
-    COUNT(DISTINCT id_raza) as razas_diferentes
+    COUNT(DISTINCT m.id_raza) as razas_diferentes
 FROM Mascota m
 JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion
 GROUP BY ea.descripcion
@@ -160,11 +37,11 @@ CREATE OR REPLACE VIEW consulta_subquery AS
 SELECT 
     m.nombre,
     s.descripcion as sexo,
-    r.descripcion as raza,
+    raza.descripcion as raza,
     (SELECT COUNT(*) FROM ValoracionMedica WHERE id_mascota = m.id_mascota) as total_revisiones
 FROM Mascota m
 LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
-LEFT JOIN Raza r ON m.id_raza = r.id_raza
+LEFT JOIN Raza raza ON m.id_raza = raza.id_raza
 WHERE (SELECT COUNT(*) FROM ValoracionMedica WHERE id_mascota = m.id_mascota) > 2;
 
 -- Consulta 4: MULTIPLE JOIN - Información completa de adopciones
@@ -180,14 +57,14 @@ SELECT
     a.fecha_entrega,
     ep.descripcion as estado_proceso,
     s.descripcion as sexo,
-    r.descripcion as raza
+    raza.descripcion as raza
 FROM Adopta a
 JOIN Mascota m ON a.id_mascota = m.id_mascota
 JOIN Persona p ON a.id_persona = p.id_persona
 LEFT JOIN Rescate re ON m.id_mascota = re.id_mascota
 LEFT JOIN Persona pe ON re.id_persona = pe.id_persona
 LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
-LEFT JOIN Raza r ON m.id_raza = r.id_raza
+LEFT JOIN Raza raza ON m.id_raza = raza.id_raza
 LEFT JOIN EstadoProcesoAdopcion ep ON a.id_estado_proceso = ep.id_estado_proceso
 ORDER BY a.fecha_solicitud DESC;
 
@@ -200,7 +77,7 @@ SELECT
     p.correo_electronico,
     CASE 
         WHEN a.id_persona IS NOT NULL THEN 'Adoptante'
-        WHEN r.id_persona IS NOT NULL THEN 'Rescatista'
+        WHEN re.id_persona IS NOT NULL THEN 'Rescatista'
         ELSE 'Sin rol'
     END as rol,
     a.direccion,
@@ -208,9 +85,9 @@ SELECT
     ro.descripcion as rol_rescatista
 FROM Persona p
 NATURAL LEFT JOIN Adoptante a
-NATURAL LEFT JOIN Rescatista r
+NATURAL LEFT JOIN Rescatista re
 LEFT JOIN Ocupacion o ON a.id_ocupacion = o.id_ocupacion
-LEFT JOIN Rol ro ON r.id_rol = ro.id_rol;
+LEFT JOIN Rol ro ON re.id_rol = ro.id_rol;
 
 -- Consulta 6: PRODUCTO CARTESIANO - Mascotas y adoptantes (combinaciones posibles)
 CREATE OR REPLACE VIEW consulta_producto_cartesiano AS
@@ -229,12 +106,12 @@ SELECT
     m.id_mascota,
     m.nombre,
     s.descripcion as sexo,
-    r.descripcion as raza,
+    raza.descripcion as raza,
     ea.descripcion as estado
 FROM Mascota m
 LEFT JOIN Adopta a ON m.id_mascota = a.id_mascota
 LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
-LEFT JOIN Raza ra ON m.id_raza = ra.id_raza
+LEFT JOIN Raza raza ON m.id_raza = raza.id_raza
 LEFT JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion
 WHERE a.id_mascota IS NULL;
 
@@ -244,12 +121,12 @@ SELECT DISTINCT
     m.id_mascota,
     m.nombre,
     s.descripcion as sexo,
-    r.descripcion as raza
+    raza.descripcion as raza
 FROM Mascota m
 JOIN Rescate re ON m.id_mascota = re.id_mascota
 JOIN Adopta a ON m.id_mascota = a.id_mascota
 LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
-LEFT JOIN Raza r ON m.id_raza = r.id_raza;
+LEFT JOIN Raza raza ON m.id_raza = raza.id_raza;
 
 -- Consulta 9: PROYECCIÓN GENERALIZADA - Datos completos de mascotas con cálculos
 CREATE OR REPLACE VIEW consulta_proyeccion AS
@@ -257,7 +134,7 @@ SELECT
     m.id_mascota,
     m.nombre,
     s.descripcion as sexo,
-    r.descripcion as raza,
+    raza.descripcion as raza,
     m.fecha_nacimiento,
     TIMESTAMPDIFF(YEAR, m.fecha_nacimiento, CURDATE()) as edad_anios,
     TIMESTAMPDIFF(MONTH, m.fecha_nacimiento, CURDATE()) as edad_meses,
@@ -270,7 +147,7 @@ SELECT
     (SELECT COUNT(*) FROM Rescate WHERE id_mascota = m.id_mascota) as total_rescates
 FROM Mascota m
 LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
-LEFT JOIN Raza r ON m.id_raza = r.id_raza
+LEFT JOIN Raza raza ON m.id_raza = raza.id_raza
 LEFT JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion;
 
 -- Consulta 10: ASIGNACIÓN - Renombrar columnas para mejor entendimiento
@@ -280,7 +157,7 @@ SELECT
     p.telefono AS "Teléfono Adoptante",
     m.nombre AS "Nombre Mascota",
     s.descripcion AS "Sexo Mascota",
-    r.descripcion AS "Raza Mascota",
+    raza.descripcion AS "Raza Mascota",
     ea.descripcion AS "Estado Mascota",
     a.fecha_solicitud AS "Fecha Solicitud",
     ep.descripcion AS "Estado Proceso"
@@ -288,7 +165,7 @@ FROM Adopta a
 JOIN Persona p ON a.id_persona = p.id_persona
 JOIN Mascota m ON a.id_mascota = m.id_mascota
 LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
-LEFT JOIN Raza r ON m.id_raza = r.id_raza
+LEFT JOIN Raza raza ON m.id_raza = raza.id_raza
 LEFT JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion
 LEFT JOIN EstadoProcesoAdopcion ep ON a.id_estado_proceso = ep.id_estado_proceso;
 
@@ -328,7 +205,7 @@ SELECT
     m.nombre,
     m.fecha_nacimiento,
     s.descripcion as sexo,
-    r.descripcion as raza,
+    raza.descripcion as raza,
     ea.descripcion as estado_actual,
     (SELECT COUNT(*) FROM Adopta WHERE id_mascota = m.id_mascota) as veces_adoptado,
     CASE 
@@ -338,24 +215,24 @@ SELECT
     END as historial_adopcion
 FROM Mascota m
 LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
-LEFT JOIN Raza r ON m.id_raza = r.id_raza
+LEFT JOIN Raza raza ON m.id_raza = raza.id_raza
 LEFT JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion
 ORDER BY veces_adoptado DESC;
 
 -- Consulta 14: GRANT - Resumen de accesos por rol
 CREATE OR REPLACE VIEW consulta_grant AS
 SELECT 
-    r.descripcion as rol,
+    ro.descripcion as rol,
     COUNT(DISTINCT re.id_persona) as cantidad_usuarios,
     'SELECT, INSERT, UPDATE' as permisos_base,
-    CASE r.id_rol
+    CASE ro.id_rol
         WHEN 3 THEN 'Acceso a todos los datos médicos'
         WHEN 1 THEN 'Acceso a rescates y asignaciones'
         ELSE 'Acceso general'
     END as privilegios_especiales
-FROM Rol r
-LEFT JOIN Rescatista re ON r.id_rol = re.id_rol
-GROUP BY r.id_rol, r.descripcion;
+FROM Rol ro
+LEFT JOIN Rescatista re ON ro.id_rol = re.id_rol
+GROUP BY ro.id_rol, ro.descripcion;
 
 -- Consulta 15: DROP - Mascotas con información incompleta (para revisión)
 CREATE OR REPLACE VIEW consulta_drop AS
