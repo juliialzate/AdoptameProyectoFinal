@@ -65,72 +65,72 @@ include 'header.php';
                 </h5>
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_inner_join.php" class="btn btn-outline-primary w-100 py-2">
+                        <a href="consultas.php?vista=consulta_inner_join" class="btn btn-outline-primary w-100 py-2">
                             <i class="fas fa-link"></i> 1. INNER JOIN
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_group_by.php" class="btn btn-outline-success w-100 py-2">
+                        <a href="consultas.php?vista=consulta_group_by" class="btn btn-outline-success w-100 py-2">
                             <i class="fas fa-chart-bar"></i> 2. GROUP BY
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_subquery.php" class="btn btn-outline-warning w-100 py-2">
+                        <a href="consultas.php?vista=consulta_subquery" class="btn btn-outline-warning w-100 py-2">
                             <i class="fas fa-search"></i> 3. SUBQUERY
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_multiple_join.php" class="btn btn-outline-info w-100 py-2">
+                        <a href="consultas.php?vista=consulta_multiple_join" class="btn btn-outline-info w-100 py-2">
                             <i class="fas fa-code-branch"></i> 4. MULTIPLE JOIN
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_reunion_natural.php" class="btn btn-outline-secondary w-100 py-2">
+                        <a href="consultas.php?vista=consulta_reunion_natural" class="btn btn-outline-secondary w-100 py-2">
                             <i class="fas fa-project-diagram"></i> 5. REUNIÓN NATURAL
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_producto_cartesiano.php" class="btn btn-outline-danger w-100 py-2">
+                        <a href="consultas.php?vista=consulta_producto_cartesiano" class="btn btn-outline-danger w-100 py-2">
                             <i class="fas fa-times"></i> 6. PRODUCTO CARTESIANO
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_diferencia.php" class="btn btn-outline-dark w-100 py-2">
+                        <a href="consultas.php?vista=consulta_diferencia" class="btn btn-outline-dark w-100 py-2">
                             <i class="fas fa-minus-circle"></i> 7. DIFERENCIA
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_intersect.php" class="btn btn-outline-primary w-100 py-2">
+                        <a href="consultas.php?vista=consulta_intersect" class="btn btn-outline-primary w-100 py-2">
                             <i class="fas fa-intersection"></i> 8. INTERSECT
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_proyeccion.php" class="btn btn-outline-success w-100 py-2">
+                        <a href="consultas.php?vista=consulta_proyeccion" class="btn btn-outline-success w-100 py-2">
                             <i class="fas fa-arrow-right"></i> 9. PROYECCIÓN
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_asignacion.php" class="btn btn-outline-warning w-100 py-2">
+                        <a href="consultas.php?vista=consulta_asignacion" class="btn btn-outline-warning w-100 py-2">
                             <i class="fas fa-tag"></i> 10. ASIGNACIÓN
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_division.php" class="btn btn-outline-info w-100 py-2">
+                        <a href="consultas.php?vista=consulta_division" class="btn btn-outline-info w-100 py-2">
                             <i class="fas fa-divide"></i> 11. DIVISIÓN
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_revoke.php" class="btn btn-outline-secondary w-100 py-2">
+                        <a href="consultas.php?vista=consulta_revoke" class="btn btn-outline-secondary w-100 py-2">
                             <i class="fas fa-user-slash"></i> 12. REVOKE
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_alter.php" class="btn btn-outline-danger w-100 py-2">
+                        <a href="consultas.php?vista=consulta_alter" class="btn btn-outline-danger w-100 py-2">
                             <i class="fas fa-edit"></i> 13. ALTER
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <a href="consulta_grant.php" class="btn btn-outline-dark w-100 py-2">
+                        <a href="consultas.php?vista=consulta_grant" class="btn btn-outline-dark w-100 py-2">
                             <i class="fas fa-user-check"></i> 14. GRANT
                         </a>
                     </div>
