@@ -1,3 +1,4 @@
+
 -- ============================================
 -- ELIMINAR TABLAS EXISTENTES (si las hay)
 -- ============================================
@@ -75,7 +76,7 @@ CREATE TABLE Persona (
     correo_electronico VARCHAR(100)
 );
 
--- Tabla Mascota
+-- Tabla Mascota (con campo imagen)
 CREATE TABLE Mascota (
     id_mascota INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(50) NOT NULL,
@@ -83,6 +84,7 @@ CREATE TABLE Mascota (
     id_raza INT,
     fecha_nacimiento DATE,
     id_estado_adopcion INT,
+    imagen VARCHAR(255) NULL,  -- <--- CAMPO PARA IMÁGENES
     FOREIGN KEY (id_sexo) REFERENCES Sexo(id_sexo),
     FOREIGN KEY (id_raza) REFERENCES Raza(id_raza),
     FOREIGN KEY (id_estado_adopcion) REFERENCES EstadoAdopcion(id_estado_adopcion)
@@ -263,18 +265,18 @@ INSERT INTO Persona (nombre, telefono, correo_electronico) VALUES
 ('Jorge Castro', '308901234', 'jorge@email.com'),
 ('Sofía Díaz', '309012345', 'sofia@email.com');
 
--- 3.3 Mascota (10)
-INSERT INTO Mascota (nombre, id_sexo, id_raza, fecha_nacimiento, id_estado_adopcion) VALUES 
-('Firulais', 1, 1, '2023-01-15', 1),
-('Luna', 2, 2, '2022-08-20', 2),
-('Max', 1, 3, '2023-03-10', 3),
-('Bella', 2, 4, '2022-11-05', 1),
-('Rocky', 1, 5, '2023-06-25', 2),
-('Maya', 2, 6, '2022-09-12', 3),
-('Simón', 1, 7, '2023-02-18', 1),
-('Nina', 2, 8, '2022-07-30', 2),
-('Toby', 1, 9, '2023-04-22', 3),
-('Lola', 2, 10, '2022-10-08', 1);
+-- 3.3 Mascota (10 con imagen NULL)
+INSERT INTO Mascota (nombre, id_sexo, id_raza, fecha_nacimiento, id_estado_adopcion, imagen) VALUES 
+('Firulais', 1, 1, '2023-01-15', 1, NULL),
+('Luna', 2, 2, '2022-08-20', 2, NULL),
+('Max', 1, 3, '2023-03-10', 3, NULL),
+('Bella', 2, 4, '2022-11-05', 1, NULL),
+('Rocky', 1, 5, '2023-06-25', 2, NULL),
+('Maya', 2, 6, '2022-09-12', 3, NULL),
+('Simón', 1, 7, '2023-02-18', 1, NULL),
+('Nina', 2, 8, '2022-07-30', 2, NULL),
+('Toby', 1, 9, '2023-04-22', 3, NULL),
+('Lola', 2, 10, '2022-10-08', 1, NULL);
 
 -- 3.4 Rescatista (10)
 INSERT INTO Rescatista (id_persona, id_rol) VALUES 
