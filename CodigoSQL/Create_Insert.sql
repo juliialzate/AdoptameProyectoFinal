@@ -355,3 +355,108 @@ INSERT INTO Adopta (id_mascota, id_persona, fecha_solicitud, fecha_entrega, id_e
 (8, 8, '2024-03-05', '2024-03-20', 3),
 (9, 9, '2024-03-10', NULL, 5),
 (10, 10, '2024-03-15', NULL, 2);
+
+-- ============================================
+-- 4. Creacion De Vistas para el Sistema de Adopción
+-- ============================================
+
+-- Vista Administrador
+CREATE OR REPLACE VIEW vista_administrador AS
+SELECT 
+    'Mascotas' as tipo,
+    COUNT(*) as total,
+    (SELECT COUNT(*) FROM Mascota WHERE id_estado_adopcion = 1) as disponibles,
+    (SELECT COUNT(*) FROM Mascota WHERE id_estado_adopcion = 2) as en_proceso,
+    (SELECT COUNT(*) FROM Mascota WHERE id_estado_adopcion = 3) as adoptadas
+FROM Mascota
+UNION ALL
+SELECT 'Adoptantes', COUNT(*), 
+    (SELECT COUNT(*) FROM Adoptante WHERE id_estado_habilitacion = 1),
+    (SELECT COUNT(*) FROM Adoptante WHERE id_estado_habilitacion = 2),
+    (SELECT COUNT(*) FROM Adoptante WHERE id_estado_habilitacion = 3)
+FROM Adoptante
+UNION ALL
+SELECT 'Rescatistas', COUNT(*), 
+    (SELECT COUNT(*) FROM Rescatista WHERE id_rol = 1),
+    (SELECT COUNT(*) FROM Rescatista WHERE id_rol = 2),
+    (SELECT COUNT(*) FROM Rescatista WHERE id_rol = 3)
+FROM Rescatista
+UNION ALL
+SELECT 'Adopciones', COUNT(*),
+    (SELECT COUNT(*) FROM Adopta WHERE id_estado_proceso = 1),
+    (SELECT COUNT(*) FROM Adopta WHERE id_estado_proceso = 2),
+    (SELECT COUNT(*) FROM Adopta WHERE id_estado_proceso = 3)
+FROM Adopta;
+
+    -- Vista Veterinario
+    CREATE OR REPLACE VIEW vista_veterinario AS
+    SELECT 
+        m.id_mascota,
+        m.nombre,
+        s.descripcion as sexo,
+        r.descripcion as raza,
+        m.fecha_nacimiento,
+        TIMESTAMPDIFF(YEAR, m.fecha_nacimiento, CURDATE()) as edad,
+        ea.descripcion as estado_adopcion,
+        v.fecha_revision as ultima_revision,
+        v.diagnostico,
+        v.tratamiento,
+        v.observaciones,
+        (SELECT COUNT(*) FROM Vacuna WHERE id_valoracion = v.id_valoracion) as total_vacunas
+    FROM Mascota m
+    LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
+    LEFT JOIN Raza r ON m.id_raza = r.id_raza
+    LEFT JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion
+    LEFT JOIN ValoracionMedica v ON m.id_mascota = v.id_mascota
+    WHERE v.fecha_revision = (
+        SELECT MAX(fecha_revision) 
+        FROM ValoracionMedica 
+        WHERE id_mascota = m.id_mascota
+    ) OR v.fecha_revision IS NULL;
+
+    -- Vista Adopciones
+    CREATE OR REPLACE VIEW vista_adopciones AS
+    SELECT 
+        a.id_adopcion,
+        m.nombre as mascota,
+        p.nombre as adoptante,
+        p.telefono,
+        p.correo_electronico,
+        a.fecha_solicitud,
+        a.fecha_entrega,
+        ep.descripcion as estado_proceso,
+        ea.descripcion as estado_mascota,
+        s.descripcion as sexo,
+        r.descripcion as raza,
+        DATEDIFF(CURDATE(), a.fecha_solicitud) as dias_en_proceso
+    FROM Adopta a
+    JOIN Mascota m ON a.id_mascota = m.id_mascota
+    JOIN Persona p ON a.id_persona = p.id_persona
+    JOIN EstadoProcesoAdopcion ep ON a.id_estado_proceso = ep.id_estado_proceso
+    LEFT JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion
+    LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
+    LEFT JOIN Raza r ON m.id_raza = r.id_raza;
+
+    -- Vista Rescatista
+    CREATE OR REPLACE VIEW vista_rescatista AS
+    SELECT 
+        m.id_mascota,
+        m.nombre,
+        s.descripcion as sexo,
+        r.descripcion as raza,
+    m.fecha_nacimiento,
+    TIMESTAMPDIFF(YEAR, m.fecha_nacimiento, CURDATE()) as edad,
+    ea.descripcion as estado_adopcion,
+    re.fecha_rescate,
+    re.ubicacion_rescate,
+    p.nombre as rescatista_asignado,
+    (SELECT COUNT(*) FROM ValoracionMedica vm WHERE vm.id_mascota = m.id_mascota) as total_revisiones
+    FROM Mascota m
+    JOIN Rescate re ON m.id_mascota = re.id_mascota
+    LEFT JOIN Persona p ON re.id_persona = p.id_persona   -- <--- corregido aquí
+    LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
+    LEFT JOIN Raza r ON m.id_raza = r.id_raza
+    LEFT JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion;
+
+
+
