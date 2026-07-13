@@ -86,4 +86,25 @@ SELECT
     TIMESTAMPDIFF(YEAR, m.fecha_nacimiento, CURDATE()) as edad,
     ea.descripcion as estado_adopcion,
     re.fecha_rescate,
-    re.ubicacion_resc
+    re.ubicacion_rescate,
+    re.historia_rescate,
+    p.nombre as rescatista_asignado,
+    ro.descripcion as rol_rescatista,
+    (SELECT COUNT(*) FROM ValoracionMedica WHERE id_mascota = m.id_mascota) as total_revisiones
+FROM Mascota m
+LEFT JOIN Sexo s ON m.id_sexo = s.id_sexo
+LEFT JOIN Raza r ON m.id_raza = r.id_raza
+LEFT JOIN EstadoAdopcion ea ON m.id_estado_adopcion = ea.id_estado_adopcion
+LEFT JOIN Rescate re ON m.id_mascota = re.id_mascota
+LEFT JOIN Persona p ON re.id_persona = p.id_persona
+LEFT JOIN Rescatista resc ON p.id_persona = resc.id_persona
+LEFT JOIN Rol ro ON resc.id_rol = ro.id_rol;
+                        </pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php include 'footer.php'; ?>
