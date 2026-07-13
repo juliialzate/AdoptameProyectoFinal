@@ -48,7 +48,7 @@ include 'header.php';
                 </div>
                 <div class="row mt-2">
                     <div class="col-md-4 mx-auto">
-                        <a href="vista_adoptante.php" class="btn btn-pastel-info w-100 py-3">
+                        <a href="vista_adopciones.php" class="btn btn-pastel-info w-100 py-3">
                             <i class="fas fa-user"></i><br>
                             Adoptante (Mascotas Disponibles)
                         </a>
